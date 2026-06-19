@@ -22,7 +22,9 @@ yarn-error.log*
 *.csv
 
 # Generated parquet artifacts — derived from the CSV by backend/data_pipeline.py.
-backend/artifacts/*.parquet
+# Kept TRACKED (only ~8.5 MB) so the deployed backend has its data: the source CSV is too
+# large to commit, so these are the only way Render gets something to serve.
+# backend/artifacts/*.parquet
 
 # ---- Generated / build outputs ----
 hackathon_ppt/assets/*.png

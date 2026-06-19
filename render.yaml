@@ -1,0 +1,13 @@
+# Render blueprint for the FastAPI backend.
+# Either let Render auto-detect this file ("New → Blueprint" and point at the repo),
+# or set the Build/Start commands below manually in a "New → Web Service".
+services:
+  - type: web
+    name: parking-intelligence-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"

@@ -18,11 +18,15 @@ function toQuery(filters = {}) {
   return p.toString();
 }
 
+// In dev this is empty, so calls go to "/api/..." and Vite's proxy forwards them to localhost:8000.
+// In production (Vercel) set VITE_API_BASE to the Render backend URL, e.g. https://xxx.onrender.com
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+
 async function get(path, filters, extra = {}) {
   const qs = new URLSearchParams(toQuery(filters));
   Object.entries(extra).forEach(([k, v]) => qs.set(k, v));
   const q = qs.toString();
-  const res = await fetch(`/api${path}${q ? `?${q}` : ""}`);
+  const res = await fetch(`${API_BASE}/api${path}${q ? `?${q}` : ""}`);
   if (!res.ok) throw new Error(`${path} -> ${res.status}`);
   return res.json();
 }
