@@ -1,0 +1,48 @@
+# ---- Python (backend) ----
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ---- Node / Vite (frontend) ----
+node_modules/
+frontend/dist/
+frontend/node_modules/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---- Raw data (too large for git; >100MB GitHub limit) ----
+# The source violation CSV is not committed. Regenerate artifacts with backend/data_pipeline.py.
+*.csv
+
+# Generated parquet artifacts — derived from the CSV by backend/data_pipeline.py.
+backend/artifacts/*.parquet
+
+# ---- Generated / build outputs ----
+hackathon_ppt/assets/*.png
+
+# ---- Office temp / lock files ----
+.~lock.*#
+~$*
+
+# ---- Environment & secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Claude Code local config ----
+.claude/
+
+# ---- OS / editor cruft ----
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
