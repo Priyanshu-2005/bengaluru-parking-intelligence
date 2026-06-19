@@ -22,11 +22,32 @@ function toQuery(filters = {}) {
 // In production (Vercel) set VITE_API_BASE to the Render backend URL, e.g. https://xxx.onrender.com
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Render's free tier spins the backend down after ~15 min idle. The first requests after that hit
+// the instance mid-spin-up and come back as 502/503 with no CORS header — which the browser
+// surfaces as a "CORS policy" error and a rejected fetch. So we retry with backoff for ~80s to
+// ride out the cold start instead of hard-failing the whole dashboard on first load.
+async function fetchWithRetry(url, tries = 12) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.status >= 502 && res.status <= 504) throw new Error(`upstream ${res.status}`);
+      return res;
+    } catch (e) {
+      lastErr = e; // network/CORS reject during spin-up, or a 5xx we threw above
+      if (i < tries - 1) await sleep(Math.min(2000 * (i + 1), 8000));
+    }
+  }
+  throw lastErr;
+}
+
 async function get(path, filters, extra = {}) {
   const qs = new URLSearchParams(toQuery(filters));
   Object.entries(extra).forEach(([k, v]) => qs.set(k, v));
   const q = qs.toString();
-  const res = await fetch(`${API_BASE}/api${path}${q ? `?${q}` : ""}`);
+  const res = await fetchWithRetry(`${API_BASE}/api${path}${q ? `?${q}` : ""}`);
   if (!res.ok) throw new Error(`${path} -> ${res.status}`);
   return res.json();
 }
