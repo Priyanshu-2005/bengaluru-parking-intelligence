@@ -1,18 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { mappls } from "mappls-web-maps";
 
-// Mappls (MapmyIndia) Web SDK. Needs a token/REST key from apps.mappls.com with the Map SDK
-// product enabled, and the serving domain (localhost + your Vercel URL) whitelisted on the key.
+// Mappls (MapmyIndia) Web Map SDK, loaded directly from the advancedmaps map_sdk endpoint with a
+// REST/Map-SDK key (apps.mappls.com). The SDK is Mapbox-GL based, so the map object supports the
+// standard GL API (addSource/addLayer/flyTo). The serving domain must be whitelisted on the key.
 const MAPPLS_KEY = import.meta.env.VITE_MAPPLS_KEY;
 
-// Mappls Map property center uses [lat, lng].
+// Mappls Map constructor center uses [lat, lng].
 const BENGALURU_CENTER = [12.9716, 77.5946];
-
-const mapplsClassObject = new mappls();
 
 const SRC_ID = "zones-src";
 const CIRCLE_LAYER = "zones-circles";
 const HEAT_LAYER = "zones-heat";
+
+// Load the Mappls SDK script once; resolves with the global `mappls` object.
+let sdkPromise = null;
+function loadMapplsSDK(key) {
+  if (sdkPromise) return sdkPromise;
+  sdkPromise = new Promise((resolve, reject) => {
+    if (window.mappls?.Map) return resolve(window.mappls);
+    const cbName = "__initMapplsSDK__";
+    window[cbName] = () => resolve(window.mappls);
+    const s = document.createElement("script");
+    s.src = `https://apis.mappls.com/advancedmaps/api/${key}/map_sdk?layer=vector&v=3.0&callback=${cbName}`;
+    s.async = true;
+    s.onerror = () => reject(new Error("Failed to load Mappls SDK"));
+    document.head.appendChild(s);
+  });
+  return sdkPromise;
+}
 
 function formatDistance(m) {
   return m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`;
@@ -55,6 +70,7 @@ function zonesToGeoJSON(zones, weightBy, maxViol, maxWeight, selectedId) {
 export default function HotspotMap({ zones, selectedId, onSelect, weightBy, onWeightChange }) {
   const mapRef = useRef(null);
   const [ready, setReady] = useState(false);
+  const [err, setErr] = useState(false);
   const [hover, setHover] = useState(null);
   const fittedRef = useRef(false);
   // keep latest onSelect without re-binding the map click handler
@@ -63,22 +79,26 @@ export default function HotspotMap({ zones, selectedId, onSelect, weightBy, onWe
 
   const maxViol = useMemo(() => Math.max(...zones.map((z) => z.violations || 0), 1), [zones]);
 
-  // --- Initialize the Mappls map once ---
+  // --- Load SDK + create the map once ---
   useEffect(() => {
     if (!MAPPLS_KEY) return;
     let cancelled = false;
-    mapplsClassObject.initialize(MAPPLS_KEY, { map: true }, () => {
-      if (cancelled) return;
-      const map = mapplsClassObject.Map({
-        id: "mappls-map",
-        properties: { center: BENGALURU_CENTER, zoom: 11, zoomControl: true, scaleControl: false },
-      });
-      map.on("load", () => {
+    loadMapplsSDK(MAPPLS_KEY)
+      .then((mappls) => {
         if (cancelled) return;
-        mapRef.current = map;
-        setReady(true);
-      });
-    });
+        const map = new mappls.Map("mappls-map", {
+          center: BENGALURU_CENTER,
+          zoom: 11,
+          zoomControl: true,
+          location: false,
+        });
+        map.on("load", () => {
+          if (cancelled) return;
+          mapRef.current = map;
+          setReady(true);
+        });
+      })
+      .catch(() => !cancelled && setErr(true));
     return () => {
       cancelled = true;
       try {
@@ -210,6 +230,12 @@ export default function HotspotMap({ zones, selectedId, onSelect, weightBy, onWe
       ) : (
         <div className="mappls-map map-fallback">
           Set <code>VITE_MAPPLS_KEY</code> in <code>frontend/.env</code> to load the Mappls map.
+        </div>
+      )}
+
+      {err && (
+        <div className="map-tooltip" style={{ left: "50%", top: "50%" }}>
+          Could not load the Mappls SDK (check the key + whitelisted domain).
         </div>
       )}
 
