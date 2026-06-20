@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Heraldic shield — civic/enforcement authority feel -->
+  <path d="M16 2.5 L27 6.2 V15.5 C27 22.4 22.1 26.9 16 29 C9.9 26.9 5 22.4 5 15.5 V6.2 Z"
+        fill="#13294b" stroke="#c9a227" stroke-width="1.2"/>
+  <!-- Inner rule line, like an official medallion border -->
+  <path d="M16 5 L24.4 7.8 V15.4 C24.4 20.8 20.6 24.4 16 26.2 C11.4 24.4 7.6 20.8 7.6 15.4 V7.8 Z"
+        fill="none" stroke="#c9a227" stroke-width="0.7" stroke-opacity="0.55"/>
+  <!-- Serif "P" for Parking -->
+  <text x="16" y="21.6" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="15.5" font-weight="700" fill="#ffffff">P</text>
+</svg>
