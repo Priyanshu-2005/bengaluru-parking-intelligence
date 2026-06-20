@@ -31,8 +31,8 @@ their impact on traffic flow** to enable *targeted* enforcement?
 ---
 ---
 ## Links
-# Working Prototype: https://bengaluru-parking-intelligence-beryl.vercel.app/
-# Demo: https://youtu.be/piWuZm0jfX8
+** Working Prototype** : https://bengaluru-parking-intelligence-beryl.vercel.app/
+** Demo **: https://youtu.be/piWuZm0jfX8
 ---
 ## What This Does
 
