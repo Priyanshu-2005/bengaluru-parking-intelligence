@@ -34,8 +34,12 @@ their impact on traffic flow** to enable *targeted* enforcement?
 | Resource | Link |
 |----------|------|
 | Working Prototype | [Open](https://bengaluru-parking-intelligence-beryl.vercel.app/) |
-| Demo Video | [Watch](https://youtu.be/piWuZm0jfX8) |## What This Does
+| Demo Video | [Watch](https://youtu.be/piWuZm0jfX8) |
+
 ---
+
+## What This Does
+
 It turns **248,691 raw parking tickets into 1,323 ranked, patrol-sized hotspots** — ranked not by
 *how many* violations happened, but by *how much each one actually disrupts traffic flow*.
 
@@ -92,22 +96,38 @@ Enforcement is organized by police station, so the searchable **Police Station**
 
 ## How It Works
 
-```
-  jan to may police violation CSV  (~109 MB raw tickets)
-            │
-            ▼   backend/data_pipeline.py     ← run once (offline)
-   ┌─────────────────────────────────────┐
-   │ 1. Clean   → drop rejected/invalid, UTC→IST, Bengaluru bbox
-   │ 2. Cluster → DBSCAN + recursive patrol-sizing → 1,323 zones
-   │ 3. Persist → backend/artifacts/*.parquet
-   └─────────────────────────────────────┘
-            │   violations.parquet · zones.parquet · stations.parquet
-            ▼   backend/scoring.py            ← per request (on-demand)
-   ┌─────────────────────────────────────┐
-   │ hotspot_score · congestion_impact · priority_score   (each 0–100)
-   └─────────────────────────────────────┘
-            │
-            ▼   backend/api.py  (FastAPI)  ──HTTP──▶  frontend/  (React + Vite + Leaflet)
+```mermaid
+flowchart TB
+    CSV[("Raw violation CSV<br/>~109 MB tickets")]
+
+    subgraph OFFLINE["backend/data_pipeline.py — run once, offline"]
+        direction TB
+        C1["1 · Clean<br/>drop rejected/invalid · UTC→IST · Bengaluru bbox"]
+        C2["2 · Cluster<br/>DBSCAN + recursive patrol-sizing → 1,323 zones"]
+        C3["3 · Persist<br/>write parquet artifacts"]
+        C1 --> C2 --> C3
+    end
+
+    ART[("violations · zones · stations<br/>.parquet artifacts")]
+
+    subgraph RUNTIME["backend/scoring.py — per request, on-demand"]
+        direction TB
+        S["Score every zone<br/>hotspot · congestion_impact · priority<br/>each 0–100, filter-aware"]
+    end
+
+    API["backend/api.py<br/>FastAPI"]
+    FE["frontend<br/>React + Vite + Leaflet"]
+
+    CSV --> C1
+    C3 --> ART
+    ART --> S
+    S --> API
+    API -->|HTTP / JSON| FE
+
+    classDef store fill:#fff3cd,stroke:#c9a227,color:#13294b;
+    classDef proc fill:#e7f0fb,stroke:#3f88c5,color:#13294b;
+    class CSV,ART store;
+    class C1,C2,C3,S,API,FE proc;
 ```
 
 **Why two stages?** Spatial clustering is stable and expensive, so it's precomputed once. But *which*
