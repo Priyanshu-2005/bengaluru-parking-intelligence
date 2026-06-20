@@ -8,7 +8,7 @@
 
 Built for the **Flipkart Gridlock Hackathon**.
 
-`FastAPI` · `scikit-learn (DBSCAN)` · `pandas` · `React + Vite` · `Leaflet` · `Recharts`
+`FastAPI` · `scikit-learn (DBSCAN)` · `pandas` · `React + Vite` · `Mappls (MapmyIndia) Maps` · `Recharts`
 
 </div>
 
@@ -116,7 +116,7 @@ flowchart TB
     end
 
     API["backend/api.py<br/>FastAPI"]
-    FE["frontend<br/>React + Vite + Leaflet"]
+    FE["frontend<br/>React + Vite + Mappls Maps"]
 
     CSV --> C1
     C3 --> ART
@@ -221,6 +221,12 @@ npm run dev                                          # → http://localhost:5173
 ```
 The Vite dev server proxies `/api` to the backend on port 8000, so no extra config is needed locally.
 
+> **Map basemap:** the dashboard uses the **Mappls (MapmyIndia) Web Map SDK**. Set `VITE_MAPPLS_KEY`
+> in `frontend/.env` (see `.env.example`) and whitelist your serving domain on the key. Mappls rejects
+> loopback origins (`localhost`/`127.0.0.1`), so the basemap may not render in local dev even with a
+> valid key — it works once deployed to a whitelisted domain (see the live demo). Without a key, the
+> map area shows a placeholder; the rest of the dashboard works regardless.
+
 ---
 
 ## API Reference
@@ -273,8 +279,13 @@ Uses `render.yaml` (or set manually):
 
 ### Frontend — Vercel
 1. Import repo → **Root Directory: `frontend`** → framework auto-detected (Vite).
-2. **Environment variable:** `VITE_API_BASE = https://<your-backend-url>` (no trailing slash).
-3. Deploy. (Vite bakes env vars at build time — **redeploy** after changing `VITE_API_BASE`.)
+2. **Environment variables:**
+   - `VITE_API_BASE = https://<your-backend-url>` (no trailing slash).
+   - `VITE_MAPPLS_KEY = <your Mappls REST/Map-SDK key>` (from [apps.mappls.com](https://apps.mappls.com/)).
+3. **Whitelist the deployed domain** on the Mappls key (console → *Whitelisted IPs & Domains*),
+   e.g. `your-app.vercel.app`, or the Map SDK returns `401`. Preview deploys use per-build
+   subdomains, so test on the stable production URL (or whitelist `*.vercel.app` if allowed).
+4. Deploy. (Vite bakes env vars at build time — **redeploy** after changing either var.)
 
 CORS is already `allow_origins=["*"]`, so any frontend origin works.
 

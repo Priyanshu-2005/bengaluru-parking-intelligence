@@ -7,9 +7,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    // Allow serving local dev under the Mappls-whitelisted hostname (see /etc/hosts trick),
-    // so the Mappls Map SDK accepts the Referer locally. Harmless in normal localhost dev.
-    allowedHosts: ["bengaluru-parking-intelligence-beryl.vercel.app", "localhost", "127.0.0.1"],
     proxy: {
       "/api": {
         target: "http://127.0.0.1:8000",
