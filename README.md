@@ -29,13 +29,13 @@ Today, enforcement of this is **patrol-based and reactive**:
 their impact on traffic flow** to enable *targeted* enforcement?
 
 ---
----
 ## Links
-** Working Prototype** : https://bengaluru-parking-intelligence-beryl.vercel.app/
-** Demo **: https://youtu.be/piWuZm0jfX8
----
-## What This Does
 
+| Resource | Link |
+|----------|------|
+| Working Prototype | [Open](https://bengaluru-parking-intelligence-beryl.vercel.app/) |
+| Demo Video | [Watch](https://youtu.be/piWuZm0jfX8) |## What This Does
+---
 It turns **248,691 raw parking tickets into 1,323 ranked, patrol-sized hotspots** — ranked not by
 *how many* violations happened, but by *how much each one actually disrupts traffic flow*.
 
