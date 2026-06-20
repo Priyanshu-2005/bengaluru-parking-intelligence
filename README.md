@@ -34,7 +34,7 @@ their impact on traffic flow** to enable *targeted* enforcement?
 | Resource | Link |
 |----------|------|
 | Working Prototype | [Open](https://bengaluru-parking-intelligence-beryl.vercel.app/) |
-| Demo Video | [Watch](https://youtu.be/piWuZm0jfX8) |
+| Demo Video | [Watch](https://youtu.be/ptqt0_enD1o) |
 
 ---
 
